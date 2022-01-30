@@ -25,16 +25,17 @@ We seperate our model into multiple modules of python files following this list:
 Our dependencies are availables through pip or conda.<br/>
 The PyTorch version we have tested our code is 1.10<br/>
 
-main dependencies:
-attrdict
-matplotlib 
-natsort 
-numpy 
-pandas
-pytorch
-scipy 
-tabulate
-tensorboard 
-tqdm 
-wandb
-yaml
+Main dependencies:<br/>
+attrdict<br/>
+matplotlib <br/>
+natsort <br/>
+numpy <br/>
+pandas<br/>
+pytorch<br/>
+scipy <br/>
+tabulate<br/>
+tensorboard <br/>
+tqdm <br/>
+wandb<br/>
+yaml<br/>
+python-mnist<br/>
