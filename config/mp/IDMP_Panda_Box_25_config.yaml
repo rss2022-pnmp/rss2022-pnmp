@@ -1,0 +1,26 @@
+# Dataset
+dataset: panda_box
+save_as_dataset: panda_box_idmp  # panda_pap_100_7_idmp for 7idmp and panda_pap_100_15_idmp for 15 idmp
+overwrite: true
+num_dof: 2
+time_key: t
+data_keys:
+  - des_cart_pos_0
+  - des_cart_pos_1
+mp_key: idmp
+
+# MP
+mp:
+  type: idmp
+  args:
+    num_basis: 25
+    basis_bandwidth_factor: 3
+    num_basis_outside: 0
+    alpha: 25
+    tau: 2
+    duration: 2
+    alpha_phase: 3
+    num_pc_times: 201
+    pc_time_start: 0
+    pc_time_stop: 2
+    dt: 0.01
