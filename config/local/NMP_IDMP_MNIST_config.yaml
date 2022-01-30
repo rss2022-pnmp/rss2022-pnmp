@@ -1,0 +1,125 @@
+# Encoder
+Encoders:
+  cnn:
+    type: ImageEncoder
+    data: images
+    args:
+      dim_lat: 128
+      hidden_layers_obs:
+        - 128
+        - 128
+      hidden_layers_unc_obs:
+        - 128
+        - 128
+      act_func: leaky_relu
+      seed: 1234
+
+# Aggregator
+Aggregator:
+  type: NMPAggregator
+  args:
+    dim_lat: 128
+    multiple_steps: true
+    scalar_prior: True
+    prior_mean: 0.0
+    prior_var: 1
+  agg_order:
+    default: [ ]
+
+    extra:
+      - cnn
+
+# Decoder
+Decoder:
+  type: PBDecoder
+  args:
+    dim_time: 0
+    dim_val: 54
+    dim_lat: 128
+    std_only: True
+    hidden_layers_mean_val:
+      - 128
+      - 128
+      - 128
+    hidden_layers_cov_val: # cov net is useless here
+      - 8
+      - 8
+    act_func: leaky_relu
+    seed: 1234
+
+# Dataset
+dataset:
+  name: s_mnist_25/40x40-smnist.npz
+  type: Mnist
+  partition:
+    train: 0.7
+    validate: 0.15
+    test: 0.15
+  time: t
+  data:
+    images:
+      num_points: 1
+      dim_data:
+        - 1
+        - 40
+        - 40
+      load_func: null
+      time_dependent: false
+      context: true
+      predict: false
+      traj: false
+    trajs:
+      num_points: 301
+      dim_data:
+        - 2
+      load_func: null
+      time_dependent: true
+      context: false
+      predict: false
+      traj: true
+    outputs:
+      num_points: 1
+      dim_data:
+        - 54
+      load_func: null
+      time_dependent: false
+      context: false
+      predict: true
+      traj: false
+
+# DataLoader
+data_loader:
+  batch_size: 512
+  shuffle: true
+  num_workers: 0
+
+# Logger
+logger:
+  activate: True
+  log_name: NMP_IDMP_MNIST
+  type: wandb
+  watch: false
+  training_log_interval: 5
+  save_model_interval: 100
+
+loss_func:
+#  type: mp_rec_ll_loss
+  type: mp_rec_digit_mse_loss
+  args:
+    num_mc_smp: null
+    mp_config: IDMP_digits_25_config
+
+# Data Assignment Manager
+data_assignment_manager:
+  type: DMPImageAssignment
+  args:
+    num_pred_pts: 100
+
+# Training
+train_params:
+  lr: 2e-4
+  wd: 0
+  normalize: true
+  seed: 1234
+  validation_interval: 10
+  len_loss_deque: 10

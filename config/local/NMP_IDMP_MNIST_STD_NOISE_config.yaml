@@ -1,0 +1,130 @@
+# Encoder
+Encoders:
+  cnn:
+    type: ImageEncoder
+    data: images
+    args:
+      dim_lat: 128
+      hidden_layers_obs:
+        - 128
+        - 128
+      hidden_layers_unc_obs:
+        - 128
+        - 128
+      act_func: leaky_relu
+      seed: 1234
+
+# Aggregator
+Aggregator:
+  type: NMPAggregator
+  args:
+    dim_lat: 128
+    multiple_steps: true
+    scalar_prior: True
+    prior_mean: 0.0
+    prior_var: 1
+  agg_order:
+    default: [ ]
+
+    extra:
+      - cnn
+
+# Decoder
+Decoder:
+  type: PBDecoder
+  args:
+    dim_time: 0
+    dim_val: 34
+    dim_val_cov: 34
+    dim_lat: 128
+    std_only: True # TODO
+    hidden_layers_mean_val:
+      - 64
+      - 64
+      - 64
+    hidden_layers_cov_val:
+      - 128
+      - 128
+      - 128
+    #      - 256
+    act_func: leaky_relu
+    seed: 1234
+
+# Dataset
+dataset:
+  name: s_mnist_15_noise/s_mnist_15_noise.npz
+#  name: s_mnist_15/40x40-smnist.npz
+  type: Mnist
+#  online_noise: True
+  partition:
+    train: 0.7
+    validate: 0.15
+    test: 0.15
+  time: t
+  data:
+    images:
+      num_points: 1
+      dim_data:
+        - 1
+        - 40
+        - 40
+      load_func: null
+      time_dependent: false
+      context: true
+      predict: false
+      traj: false
+    trajs:
+      num_points: 301
+      dim_data:
+        - 2
+      load_func: null
+      time_dependent: true
+      context: false
+      predict: false
+      traj: true
+    outputs:
+      num_points: 1
+      dim_data:
+        - 34
+      load_func: null
+      time_dependent: false
+      context: false
+      predict: true
+      traj: false
+
+# DataLoader
+data_loader:
+  batch_size: 512
+  shuffle: true
+  num_workers: 0
+
+# Logger
+logger:
+  activate: True
+  log_name: NMP_IDMP_MNIST_COV_NOISE
+  type: wandb
+  watch: false
+  training_log_interval: 10
+  save_model_interval: 100
+
+loss_func:
+  #  type: mp_rec_ll_loss
+  type: mp_rec_digit_ll_loss
+  args:
+    num_mc_smp: null
+    mp_config: IDMP_digits_config
+
+# Data Assignment Manager
+data_assignment_manager:
+  type: DMPImagePairedAssignment
+  args:
+    num_pred_pts: 10
+
+# Training
+train_params:
+  lr: 1e-4
+  wd: 5e-5
+  normalize: true
+  seed: 1234
+  validation_interval: 20
+  len_loss_deque: 10

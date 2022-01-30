@@ -1,0 +1,137 @@
+# Encoder
+Encoders:
+  ctx:
+    type: NMPEncoder
+    data: object_pos_ori
+    args:
+      dim_time: 1
+      dim_val: 3
+      dim_lat: 128
+      hidden_layers_obs:
+        - 128
+        - 128
+        - 128
+      hidden_layers_unc_obs:
+        - 128
+        - 128
+        - 128
+      act_func: leaky_relu
+      seed: 1234
+
+# Aggregator
+Aggregator:
+  type: NMPAggregator
+  args:
+    dim_lat: 128
+    multiple_steps: true
+    scalar_prior: True
+    prior_mean: 0.0
+    prior_var: 1
+  agg_order:
+    default: [ ]
+
+    extra:
+      - ctx
+
+# Decoder
+Decoder:
+  type: PBDecoder
+  args:
+    dim_time: 0
+    dim_val: 52
+    dim_lat: 128
+    std_only: false
+    hidden_layers_mean_val:
+      - 128
+      - 128
+      - 128
+    hidden_layers_cov_val:
+      - 128
+      - 128
+      - 256
+    act_func: leaky_relu
+    seed: 1234
+
+# Dataset
+dataset:
+#  name: panda_box_idmp_25
+  name: panda_box_replayed_idmp_25
+  partition:
+    train: 0.7
+    validate: 0.2
+    test: 0.1
+  time: t
+  data:
+    object_pos_ori:
+      num_points: 201
+      dim_data:
+        - 3
+      load_func: null
+      time_dependent: true
+      context: true
+      predict: false
+      traj: false
+    des_cart_pos_vel:
+      num_points: 201
+      dim_data:
+        - 4
+      load_func: null
+      time_dependent: true
+      context: false
+      predict: false
+      traj: true
+    idmp:
+      num_points: 1
+      dim_data:
+        - 52
+      load_func: null
+      time_dependent: false
+      context: false
+      predict: true
+      traj: false
+    file_index: # Only used to replay simulation framework
+      num_points: 1
+      dim_data:
+        - 1
+      load_func: null
+      time_dependent: false
+      context: false
+      predict: false
+      traj: false
+
+
+# DataLoader
+data_loader:
+  batch_size: 128
+  shuffle: true
+  num_workers: 0
+
+# Logger
+logger:
+  activate: True
+  log_name: NMP_IDMP_PANDA_BOX_25
+  type: wandb
+  watch: false
+  training_log_interval: 50
+  save_model_interval: 500 # have to change to 2000 when using --
+
+loss_func:
+  type: mp_rec_ll_loss
+  args:
+    num_mc_smp: null
+    mp_config: IDMP_Panda_Box_25_config
+
+# Data Assignment Manager
+data_assignment_manager:
+  type: IDMPPairPredAssignment
+  args:
+    num_ctx_pred_pts: 20
+
+# Training
+train_params:
+  lr: 2e-4
+  wd: 5e-5
+  normalize: true
+  seed: 1234
+  validation_interval: 100
+  len_loss_deque: 10

@@ -1,0 +1,129 @@
+# Encoder
+Encoders:
+  ctx:  # need to change? no
+    type: NMPEncoder
+    data: ctx # change to what? # box_pos_ori
+    args:
+      dim_time: 0
+      dim_val: 4 # change from 2
+      dim_lat: 64
+      hidden_layers_obs:
+        - 64
+        - 64
+        - 64
+      hidden_layers_unc_obs:
+        - 64
+        - 64
+        - 64
+      act_func: leaky_relu
+      seed: 1234
+
+# Aggregator
+Aggregator:
+  type: NMPAggregator
+  args:
+    dim_lat: 64
+    multiple_steps: true
+    scalar_prior: True
+    prior_mean: 0.0
+    prior_var: 1
+  agg_order:
+    default: [ ]
+
+    extra:
+      - ctx # need to change? # not sure # change from pos_vel
+
+
+# Decoder
+Decoder:
+  type: PBDecoder
+  args:
+    dim_time: 0
+    dim_val: 11
+    dim_lat: 64
+    std_only: False
+    hidden_layers_mean_val:
+      - 64
+      - 64
+      - 64
+    hidden_layers_cov_val:
+      - 128
+      - 128
+      - 256 # 256
+    act_func: leaky_relu
+    seed: 1234
+
+
+# Dataset
+dataset:
+  name: pap_100_idmp # maybe panda_rrp_joints_idmp
+  partition:
+    train: 0.64
+    validate: 0.20
+    test: 0.16
+  time: t
+  data:
+    ctx:
+      num_points: 1 # 300
+      dim_data:
+        - 4 # 3
+      load_func: null
+      time_dependent: false
+      context: true
+      predict: false
+      traj: false
+    c_pos_vel_z: #
+      num_points: 101 #300
+      dim_data:
+        - 2
+      load_func: null
+      time_dependent: true
+      context: false
+      predict: false
+      traj: true
+    idmp:
+      num_points: 1
+      dim_data:
+        - 11
+      load_func: null
+      time_dependent: false
+      context: false
+      predict: true
+      traj: false
+
+# DataLoader
+data_loader:
+  batch_size: 75
+  shuffle: true
+  num_workers: 0
+
+# Logger
+logger:
+  activate: True
+  log_name: NMP_IDMP_PAP # NMP_IDMP_PANDA_RRP
+  type: wandb
+  watch: false
+  training_log_interval: 50
+  save_model_interval: -1 # have to change to 2000 when using --
+
+loss_func:
+  type: mp_rec_ll_loss
+#  type: mp_rec_mse_loss
+  args:
+    num_mc_smp: null
+    mp_config: IDMP_PAP_config # IDMP_Panda_RRP_config
+
+# Data Assignment Manager
+data_assignment_manager:
+  type: PAPPairedAssignment
+  args:
+    num_pred_pts: 20
+
+# Training
+train_params:
+  lr: 1e-4
+  wd: 5e-5
+  normalize: true
+  seed: 1234
+  validation_interval: 100
+  len_loss_deque: 20
