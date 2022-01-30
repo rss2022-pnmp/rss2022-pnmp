@@ -22,7 +22,7 @@ We seperate our model into multiple modules of python files following this list:
 └── util.py           -> where we define utilities functions<br/>
 
 
-Our dependencies are availables through pip or conda.<br/>
+Our dependencies are available through pip or conda.<br/>
 The PyTorch version we have tested our code is 1.10<br/>
 
 Main dependencies:<br/>
